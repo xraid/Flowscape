@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" data-mode="light" data-palette="blue-yellow">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flowscape — Water Logic</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="toolbar">
+    <div class="brand"><span class="brand-mark">≈</span> Flowscape</div>
+
+    <div class="group fs-controls">
+      <select id="fsSelect" title="Switch Flowscape"></select>
+      <button id="fsNew" class="btn" title="New Flowscape">New</button>
+      <button id="fsRename" class="btn ghost" title="Rename">Rename</button>
+      <button id="fsDelete" class="btn ghost" title="Delete">Delete</button>
+      <button id="fsExample" class="btn ghost" title="Load worked example">Example</button>
+      <button id="fsReset" class="btn ghost danger" title="Clear ALL saved data and reload">Reset</button>
+      <button id="fsExport" class="btn ghost" title="Export all Flowscapes as JSON">Export</button>
+      <button id="fsImport" class="btn ghost" title="Import Flowscapes from JSON">Import</button>
+      <input type="file" id="fsImportFile" accept=".json,application/json" style="display:none">
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="group view-controls">
+      <button id="toggleList" class="btn" title="Show / hide list">List</button>
+      <button id="toggleGraph" class="btn" title="Show / hide graph">Graph</button>
+    </div>
+
+    <div class="group theme-controls">
+      <select id="strongStyle" title="Strong path style">
+        <option value="flow">Flow ▸▸</option>
+        <option value="arrow">Arrow ▸</option>
+        <option value="classic">Classic ‖</option>
+      </select>
+      <select id="paletteSelect" title="Color theme">
+        <optgroup label="Six Hats">
+          <option value="hats-blue-yellow">Blue Hat</option>
+          <option value="hats-green-red">Green Hat</option>
+          <option value="hats-blue-green">Teal Hat</option>
+        </optgroup>
+        <optgroup label="Palettes">
+          <option value="blue-yellow">Ocean</option>
+          <option value="teal-coral">Reef</option>
+          <option value="violet-lime">Dusk</option>
+          <option value="ember">Ember</option>
+          <option value="slate">Slate</option>
+        </optgroup>
+      </select>
+      <button id="modeToggle" class="btn icon-btn" title="Toggle light / dark">🌙</button>
+    </div>
+  </header>
+
+  <section id="landing">
+    <div class="landing-inner">
+      <div class="brand-lg"><span class="brand-mark">≈</span> Flowscape</div>
+      <p class="landing-tag">Map a problem. Follow the flow. Find the loop.</p>
+      <p class="landing-desc">
+        A Water Logic thinking tool by Edward de Bono. Add one-liners about
+        your problem, connect them by where each thought <em>leads&nbsp;to</em>,
+        and let the structure reveal its own loops and collector points.
+      </p>
+      <svg class="landing-graph" viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <marker id="lk-arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--edge)" />
+          </marker>
+          <marker id="lk-arr-s" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--accent)" />
+          </marker>
+        </defs>
+        <!-- edges -->
+        <line x1="107" y1="40" x2="154" y2="112" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#lk-arr-s)" />
+        <line x1="152" y1="130" x2="58" y2="130" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#lk-arr)" />
+        <line x1="44" y1="114" x2="93" y2="42" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#lk-arr)" />
+        <!-- nodes -->
+        <circle cx="100" cy="28" r="20" fill="var(--node-fill)" stroke="var(--accent)" stroke-width="3" />
+        <text x="100" y="32" text-anchor="middle" font-size="13" font-weight="700" fill="var(--text)">A</text>
+        <circle cx="168" cy="130" r="20" fill="var(--node-fill)" stroke="var(--node-stroke)" stroke-width="2" />
+        <text x="168" y="134" text-anchor="middle" font-size="13" font-weight="700" fill="var(--text)">B</text>
+        <circle cx="32" cy="130" r="20" fill="var(--node-fill)" stroke="var(--node-stroke)" stroke-width="2" />
+        <text x="32" y="134" text-anchor="middle" font-size="13" font-weight="700" fill="var(--text)">C</text>
+      </svg>
+      <button id="enterBtn" class="landing-enter">Enter →</button>
+      <button class="footer-link" id="landingAbout">How to use</button>
+    </div>
+  </section>
+
+  <main class="workspace">
+    <section class="panel list-panel">
+      <div class="panel-head">
+        <h2>List</h2>
+        <span class="hint">one-liners → nodes · what does each <em>lead&nbsp;TO?</em></span>
+      </div>
+      <form id="addForm" class="add-row">
+        <input id="addInput" placeholder="Add a one-liner and press Enter…" autocomplete="off" />
+        <button type="submit" class="btn add-btn" title="Add node">＋</button>
+      </form>
+      <div class="search-wrap">
+        <input id="searchInput" class="search-input" placeholder="Filter nodes…" autocomplete="off" />
+      </div>
+      <ul id="list" class="node-list"></ul>
+    </section>
+
+    <section class="panel graph-panel">
+      <div class="panel-head">
+        <h2>Graph</h2>
+        <span class="hint" id="graphHint"></span>
+      </div>
+      <div id="legend" class="legend"></div>
+      <div id="graphWrap" class="graph-wrap">
+        <svg id="graph" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="zoom-ctrls">
+          <button id="zoomIn" class="zbtn" title="Zoom in">＋</button>
+          <button id="zoomOut" class="zbtn" title="Zoom out">−</button>
+          <button id="zoomFit" class="zbtn" title="Fit to view">⤢</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    i am <strong><a class="footer-link" href="https://iprobot.com" target="_blank">iprobot,</a></strong> me and claude made this · 2026
+    · <button class="footer-link" id="footerAbout">About</button>
+    · <button class="footer-link" id="footerMit">© MIT</button>
+  </footer>
+
+  <div id="ctxMenu" class="ctx-menu" hidden></div>
+  <div id="modalRoot"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
